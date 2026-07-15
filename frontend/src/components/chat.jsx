@@ -53,10 +53,6 @@ export default function Chat(){
                 content:
                 response.data.answer,
 
-
-                sources:
-                response.data.sources
-
             };
 
 

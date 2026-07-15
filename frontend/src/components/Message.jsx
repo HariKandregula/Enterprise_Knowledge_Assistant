@@ -14,29 +14,6 @@ export default function Message({message}){
                 {message.content}
             </p>
 
-
-            {
-                message.sources &&
-                <div className="mt-2 text-sm text-gray-600">
-
-                    <b>
-                    Sources:
-                    </b>
-
-                    {
-                        message.sources.map(
-                            (src,index)=>(
-                                <div key={index}>
-                                    📄 {src}
-                                </div>
-                            )
-                        )
-                    }
-
-                </div>
-            }
-
-
         </div>
 
     );

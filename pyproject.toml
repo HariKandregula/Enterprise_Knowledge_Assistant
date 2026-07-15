@@ -12,6 +12,12 @@ authors = [
 dependencies = [
     "django>=5.2",
     "djangorestframework>=3.16",
+    "transformers>=5.13",
+    "torch>=2.13",
+    "chromadb>=1.5.9",
+    "langchain",
+    "langchain-community",
+    "pypdf",
 ]
 
 [project.optional-dependencies]
