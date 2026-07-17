@@ -1,8 +1,39 @@
 import chromadb
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 from sentence_transformers import SentenceTransformer
+
+
+def get_model_and_chroma_collection():
+    model = SentenceTransformer("all-MiniLM-L6-v2")
+
+    client = chromadb.PersistentClient(path="./chroma_db")
+
+    collection_name = "enterprise_docs"
+
+    collection = client.get_or_create_collection(collection_name)
+    return model, collection
+
+
+def get_document(prompt):
+    model, collection = get_model_and_chroma_collection()
+
+    query_embedding = model.encode(
+    prompt,
+    convert_to_numpy=True,
+    normalize_embeddings=True
+    )
+
+    try:
+        results = collection.query(
+        query_embeddings=[query_embedding.tolist()],
+        n_results=3
+        )
+        result = results["documents"][0][0]
+        return result
+    except:
+        return ""
+
 
 def process_file(filename):
     loader = PyPDFLoader(filename)
@@ -22,20 +53,7 @@ def process_file(filename):
 
     ids = [f"chunk_{i}" for i in range(len(chunks))]
 
-    model = SentenceTransformer("all-MiniLM-L6-v2")
-
-    client = chromadb.PersistentClient(path="./chroma_db")
-
-    collection_name = "enterprise_docs"
-
-    # Delete the collection if it already exists (optional)
-    try:
-        client.delete_collection(collection_name)
-        print("Existing collection deleted.")
-    except:
-        pass
-
-    collection = client.create_collection(name=collection_name)
+    model, collection = get_model_and_chroma_collection()
 
     embeddings = model.encode(
     text_chunks,
@@ -48,19 +66,4 @@ def process_file(filename):
         documents=text_chunks,
         embeddings=embeddings.tolist(),
     )
-
-    query = "Can I work from home?"
-
-    query_embedding = model.encode(
-    query,
-    convert_to_numpy=True,
-    normalize_embeddings=True
-    )
-
-    results = collection.query(
-        query_embeddings=[query_embedding.tolist()],
-        n_results=3
-    )
-
-    return results["documents"]
 
